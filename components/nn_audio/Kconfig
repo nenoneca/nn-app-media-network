@@ -1,0 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Discover the converged nn_audio Kconfig from its nn-modules home (submodule in a
+# standalone clone, else the monorepo layout, both RELATIVE).  Exactly one
+# path exists per checkout; orsource skips the missing one.
+orsource "../../nn-modules/modules/libs/nn_audio/Kconfig"
+orsource "../../../device/modules/libs/nn_audio/Kconfig"

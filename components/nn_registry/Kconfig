@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: Apache-2.0
+# Make the converged nn_registry Kconfig (the NN_APP_* / NN_FEATURE_* / NN_LINK_*
+# gating, the single source of truth) discoverable to ESP-IDF from its home in
+# nn-modules.  Standalone app clone -> submodule path; monorepo -> the absolute
+# device/modules/libs path.  These are *optional* sources: exactly one of the two
+# paths exists in any given checkout, so only that one is pulled in.
+orsource "../../nn-modules/modules/libs/nn_registry/Kconfig"
+orsource "../../../device/modules/libs/nn_registry/Kconfig"

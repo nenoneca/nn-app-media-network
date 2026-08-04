@@ -1,0 +1,11 @@
+# SPDX-License-Identifier: Apache-2.0
+# nn-app-media-network (ESP32-C6, 8 MB flash) — dual-OTA layout.
+# The BLE (NimBLE) + Wi-Fi image is ~1.4 MB; two 3 MB app slots fit in 8 MB
+# alongside nvs/otadata/phy.  otadata holds the boot selector so the hub can
+# stage into the inactive slot and the operator triggers the swap later.
+# Name,     Type, SubType, Offset,    Size
+nvs,        data, nvs,     0x9000,    0x6000,
+otadata,    data, ota,     0xf000,    0x2000,
+phy_init,   data, phy,     0x11000,   0x1000,
+ota_0,      app,  ota_0,   0x20000,   0x300000,
+ota_1,      app,  ota_1,   0x320000,  0x300000,

@@ -1,0 +1,67 @@
+# SPDX-License-Identifier: Apache-2.0
+# nn-app-media-network (ESP32-C6) — Milestone 1 (CLI only)
+
+# Application identity → registry derives role=slave, wifi+ble+p4ctl on, OT off.
+CONFIG_NN_APP_MEDIA_NETWORK=y
+
+# Console / REPL over UART.
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+
+# OpenThread is excluded from the whole media system.
+# (left unset on purpose; nn_features.h asserts it is not enabled)
+
+# Larger main-task stack: console + SDIO bring-up.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+
+# Link transport: SPI (spi_slave_hd + essl_spi) — robust over bench wiring.
+CONFIG_NN_LINK_TRANSPORT_SPI=y
+# (Quad SPI is available via CONFIG_NN_LINK_SPI_QUAD=y, but master->slave
+# quad writes are unreliable over bench jumpers; single-line is the default.)
+
+# ── BLE provisioning (nn_prov) ───────────────────────────────────────────
+# NimBLE host, peripheral role only (the hub is the central).
+CONFIG_BT_ENABLED=y
+CONFIG_BT_NIMBLE_ENABLED=y
+CONFIG_BT_NIMBLE_ROLE_PERIPHERAL=y
+CONFIG_BT_NIMBLE_ROLE_BROADCASTER=y
+# CONFIG_BT_NIMBLE_ROLE_CENTRAL is not set
+# CONFIG_BT_NIMBLE_ROLE_OBSERVER is not set
+# Provisioning writes (ECIES envelope ~300 B) need a larger ATT MTU.
+CONFIG_BT_NIMBLE_ATT_PREFERRED_MTU=512
+
+# Wi-Fi + BLE share the single C6 radio — enable software coexistence so the
+# stream uplink and BLE advertising can run together.
+CONFIG_ESP_COEX_SW_COEXIST_ENABLE=y
+
+# ── Uplink throughput (C6 -> media server) ───────────────────────────────
+# The encrypted video uplink was capped at ~1 Mbps by the tiny default 5760 B
+# (4xMSS) TCP send window — throughput ≈ window/RTT.  Enlarge the send window
+# (and a modest recv window) so the ~3.6 Mbps 1080p stream fits; pair with WiFi
+# TX headroom + AMPDU.  (Heap-on-demand; the removed reorder pool freed room.)
+CONFIG_LWIP_TCP_SND_BUF_DEFAULT=32768
+CONFIG_LWIP_TCP_WND_DEFAULT=16384
+CONFIG_LWIP_TCP_MSS=1440
+CONFIG_LWIP_TCP_RECVMBOX_SIZE=16
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=64
+CONFIG_ESP_WIFI_DYNAMIC_TX_BUFFER_NUM=48
+CONFIG_ESP_WIFI_AMPDU_TX_ENABLED=y
+CONFIG_ESP_WIFI_STATIC_RX_BUFFER_NUM=16
+# Hardware-accelerate the nn_sectun AES-GCM (HW AES already on) so the encrypt
+# step in the single net_task isn't the uplink ceiling.
+CONFIG_MBEDTLS_HARDWARE_GCM=y
+
+# ── Crypto for ECIES v2 provisioning (X25519 + HKDF-SHA256 + AES-GCM) ─────
+CONFIG_MBEDTLS_ECP_DP_CURVE25519_ENABLED=y
+CONFIG_MBEDTLS_HKDF_C=y
+
+# ── Partition table ──────────────────────────────────────────────────────
+# The NimBLE + Wi-Fi image (~1.4 MB) overflows the 1 MB single-app default;
+# use a custom dual-OTA layout (8 MB flash): ota_0/ota_1 + otadata so the hub
+# can stage the inactive slot and the operator triggers the swap.  Rollback
+# lets a swapped image boot in TEST mode and self-confirm.
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# Dual (2-bit) P4<->C6 SPI link — quad failed (driver), dual works on IO0/IO1
+CONFIG_NN_LINK_SPI_DUAL=y

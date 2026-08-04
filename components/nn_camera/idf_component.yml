@@ -1,0 +1,4 @@
+## Managed components for nn_camera (P4 camera -> H.264 via esp_video V4L2).
+## esp_video pulls esp_cam_sensor + esp_h264 + esp_ipa at compatible versions.
+dependencies:
+  espressif/esp_video: "^2.2.0"   # 2.x supports IDF v6.0.1; pulls esp_cam_sensor 2.x + esp_h264 + esp_ipa

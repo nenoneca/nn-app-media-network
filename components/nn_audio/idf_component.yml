@@ -1,0 +1,6 @@
+## nn_audio — AAC capture/encode on the P4 (ES8311 I2S mic -> AAC-LC).
+## esp_audio_codec: standalone AAC encoder (no esp-adf needed), ESP32-P4 supported.
+## esp_codec_dev: ES8311 codec init over I2C + I2S device abstraction.
+dependencies:
+  espressif/esp_audio_codec: "^2.5.0"
+  espressif/esp_codec_dev: "^1.3.0"

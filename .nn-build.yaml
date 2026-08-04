@@ -1,0 +1,3 @@
+device_type: media_network
+toolchain: esp-idf
+target: esp32c6
